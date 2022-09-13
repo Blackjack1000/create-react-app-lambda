@@ -1,50 +1,51 @@
-import React, { Component } from "react"
-import logo from "./logo.svg"
-import "./App.css"
+import { useState } from "react";
+import GeneralSettings from "./Components/GeneralSettings";
+import MachineSettings from "./Components/MachineSettings";
+import ShowResults from "./Components/ShowResults";
+import allItems from "./dataItems";
 
-class LambdaDemo extends Component {
-  constructor(props) {
-    super(props)
-    this.state = { loading: false, msg: null }
-  }
+function App() {
+  const [selectedItem, setSelectedItem] = useState(
+    Object.entries(allItems)[0][0]
+  );
+  const [selectedCount, setSelectedCount] = useState(1);
+  const [machines, setMachines] = useState({
+    assembler: 0.5,
+    furnace: 1,
+    chemicalLab: 1,
+    belts: 15,
+  });
 
-  handleClick = api => e => {
-    e.preventDefault()
+  return (
+    <div style={{ marginLeft: "0.5em" }}>
+      <GeneralSettings
+        item={selectedItem}
+        setSelectedItem={(item) => {
+          setSelectedItem(item);
+        }}
+        count={selectedCount}
+        setSelectedCount={(count) => {
+          setSelectedCount(count);
+        }}
+      />
 
-    this.setState({ loading: true })
-    fetch("/.netlify/functions/" + api)
-      .then(response => response.json())
-      .then(json => this.setState({ loading: false, msg: json.msg }))
-  }
+      <MachineSettings
+        machines={machines}
+        setMachines={(changedMachine, value) => {
+          let temp = { ...machines };
+          temp[changedMachine] = value;
+          console.log(changedMachine, value);
+          setMachines(temp);
+        }}
+      />
 
-  render() {
-    const { loading, msg } = this.state
-
-    return (
-      <p>
-        <button onClick={this.handleClick("hello")}>{loading ? "Loading..." : "Call Lambda"}</button>
-        <button onClick={this.handleClick("async-dadjoke")}>{loading ? "Loading..." : "Call Async Lambda"}</button>
-        <br />
-        <span>{msg}</span>
-      </p>
-    )
-  }
+      <ShowResults
+        item={selectedItem}
+        count={selectedCount}
+        machines={machines}
+      />
+    </div>
+  );
 }
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <LambdaDemo />
-        </header>
-      </div>
-    )
-  }
-}
-
-export default App
+export default App;
